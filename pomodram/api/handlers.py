@@ -31,14 +31,14 @@ def new_task(update: Update, context: CallbackContext, chat_id: int) -> None:
 
 @command
 def list_task(update: Update, context: CallbackContext, chat_id: int) -> None:
-    chat_text = pomodram_service.list_task(chat_id)
+    chat_text = pomodram_service.format_list_task(chat_id)
     context.bot.send_message(chat_id, text=chat_text)
 
 
 @command
 def del_task(update: Update, context: CallbackContext, chat_id: int) -> None:
     try:
-        task_index = int(context.args[0]) - 1
+        task_index = int(context.args[0])
     except ValueError:
         context.bot.send_message(chat_id, text="Значением индекса должно быть число")
         return

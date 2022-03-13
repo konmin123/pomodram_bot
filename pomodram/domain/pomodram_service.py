@@ -18,18 +18,23 @@ class PomodramService:
         else:
             return "Введите название задачи"
 
-    def list_task(self, user_id: int) -> str:
+    def format_list_task(self, user_id: int) -> str:
         self.__init_user(user_id)
         task_text = '\n'.join([f"{index + 1}. {value}" for index, value in enumerate(self.__users_task_data[user_id])])
         if not task_text:
             return "Нет задач. Создайте хотя бы одну задачу"
         return task_text
 
+    def tasks(self, user_id: int) -> list[str]:
+        self.__init_user(user_id)
+        return self.__users_task_data[user_id]
+
     def del_task(self, user_id: int, task_index: int) -> str:
         self.__init_user(user_id)
         if not self.__users_task_data[user_id]:
             return "У вас нет задач для удаления"
 
+        task_index -= 1
         max_task_index = len(self.__users_task_data[user_id])
         if task_index >= max_task_index or task_index < 0:
             return f"Индекс задачи не находится в допустимом диапазоне [1:{max_task_index}]"
