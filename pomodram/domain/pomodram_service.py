@@ -1,9 +1,14 @@
 from typing import Union
 
+from pomodram.domain.timer import Timer
+from pomodram.domain.user_chat import UserChat
+
 
 class PomodramService:
-    def __init__(self):
+    def __init__(self, user_chat: UserChat, timer: Timer):
         self.__users_task_data: dict[Union[int, str], list[str]] = {}
+        self.__user_chat = user_chat
+        self.__timer = timer
 
     def __init_user(self, user_id: int) -> None:
         if user_id not in self.__users_task_data:
@@ -41,3 +46,11 @@ class PomodramService:
 
         del self.__users_task_data[user_id][task_index]
         return "Задача удалена"
+
+    def _finish_pomodoro(self, user_id: int) -> None:
+        ...
+
+    def start_work(self, user_id: int) -> None:
+        self.__user_chat.send_message(user_id, 'Все задачи выполнены. Нечего начинать.')
+        self.__timer.schedule(self._finish_pomodoro, 25, [user_id])
+

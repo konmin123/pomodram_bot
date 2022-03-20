@@ -1,6 +1,10 @@
+from unittest.mock import MagicMock, ANY
+
 import pytest
 
 from pomodram.domain.pomodram_service import PomodramService
+from pomodram.domain.timer import Timer
+from pomodram.domain.user_chat import UserChat
 
 
 @pytest.mark.parametrize("task_name, expected_result", [("123", "ok"), ("", "Введите название задачи")])
@@ -58,3 +62,42 @@ def test_del_task__when_task_index__then_correct_answer(
     # then
     assert result == expected_result
     assert pomodram_service.tasks(123) == expected_tasks
+
+
+def test_start_work__when_no_pomodoros__then_warning_message():
+    # given
+    user_chat = MagicMock(UserChat)
+    service = PomodramService(user_chat)
+
+    # when
+    service.start_work(42)
+
+    # then
+    user_chat.send_message.assert_called_once_with(42, 'Все задачи выполнены. Нечего начинать.')
+
+
+def test_start_work__when_one_pomodoro__then_plan_pomodor_and_break():
+    # given
+    user_chat = MagicMock(UserChat)
+    timer = MagicMock(Timer)
+    service = PomodramService(user_chat, timer)
+    service.new_task(42, 'Task 1')
+
+    # when
+    service.start_work(42)
+
+    # then
+    timer.schedule.assert_called_with(service._finish_pomodoro, 25, [42])
+
+
+def test_finish_pomodoro__when_one_pomodoro__then__finish():
+    # given
+    user_chat = MagicMock(UserChat)
+    service = PomodramService(user_chat, MagicMock(Timer))
+    service.new_task(42, 'Task 1')
+
+    # when
+    service._finish_pomodoro(42)
+
+    # then
+    user_chat.send_message.assert_called_once_with(42, 'Все задачи выполнены')
